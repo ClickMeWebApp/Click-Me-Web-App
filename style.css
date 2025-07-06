@@ -1,0 +1,476 @@
+:root {
+    /* Light Mode Colors */
+    --bg-color: #f0f2f5;
+    --card-bg-color: #ffffff;
+    --text-color: #333333;
+    --secondary-text-color: #666666;
+    --primary-btn-bg: #4A90E2;
+    --primary-btn-text: #ffffff;
+    --secondary-btn-bg: #e0e0e0;
+    --secondary-btn-text: #333333;
+    --progress-bar-color: #4A90E2;
+    --success-popup-bg: #D4EDDA; /* Light green for success */
+    --success-popup-text: #155724; /* Dark green text */
+    --error-popup-bg: #F8D7DA;
+    --error-popup-text: #721C24;
+    --border-color: #e0e0e0;
+
+    /* Warning Popup Colors (Light Mode) */
+    --warning-popup-bg: #FFF3CD; /* Light yellow for warning */
+    --warning-popup-text: #856404; /* Dark yellow text */
+    --warning-popup-border: #FFECB3;
+}
+
+/* Dark Mode Colors */
+body.dark-mode {
+    --bg-color: #1c1c1c;
+    --card-bg-color: #2c2c2c;
+    --text-color: #f0f0f0;
+    --secondary-text-color: #cccccc;
+    --primary-btn-bg: #5B8CDE;
+    --primary-btn-text: #ffffff;
+    --secondary-btn-bg: #444444;
+    --secondary-btn-text: #f0f0f0;
+    --progress-bar-color: #5B8CDE;
+    --success-popup-bg: #28a745; /* Darker green for dark mode */
+    --success-popup-text: #ffffff;
+    --error-popup-bg: #dc3545; /* Darker red for dark mode */
+    --error-popup-text: #ffffff;
+    --border-color: #444444;
+
+    /* Warning Popup Colors (Dark Mode) */
+    --warning-popup-bg: #FFC107; /* Darker yellow for dark mode */
+    --warning-popup-text: #343a40; /* Dark text for contrast */
+    --warning-popup-border: #FFD56B;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align to top for better mobile view */
+    min-height: 100vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.app-container {
+    background-color: var(--card-bg-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 25px;
+    margin: 20px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Spacing between sections */
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.app-title {
+    font-size: 2em;
+    margin: 0;
+    color: var(--text-color);
+}
+
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.theme-toggle .icon {
+    font-size: 1.2em;
+    color: var(--secondary-text-color);
+}
+
+/* Toggle switch styling */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 45px;
+    height: 25px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--secondary-btn-bg);
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 25px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 19px;
+    width: 19px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--primary-btn-bg);
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--primary-btn-bg);
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px var(--primary-btn-bg);
+}
+
+input:checked + .slider:before {
+    -webkit-transform: translateX(20px);
+    -ms-transform: translateX(20px);
+    transform: translateX(20px);
+}
+
+/* Style for the Welcome User section (Top-Left) */
+.welcome-user {
+    text-align: left; /* Align text to the left */
+    margin-bottom: 10px; /* Add some space below it */
+    padding: 0 5px; /* Optional: small padding for alignment */
+}
+
+.welcome-user p {
+    font-size: 1.2em; /* Slightly larger font size for name */
+    font-weight: bold; /* Make it bold */
+    color: var(--text-color); /* Use primary text color */
+    margin: 0; /* Remove default paragraph margin */
+}
+
+.welcome-user span {
+    color: var(--primary-btn-bg); /* Use a highlight color for the name/id */
+}
+
+.welcome-user .user-id-display {
+    font-size: 0.95em; /* Slightly smaller font for user ID */
+    font-weight: normal; /* Normal weight */
+    color: var(--secondary-text-color); /* Secondary color for ID */
+    margin-top: 5px; /* Small margin above it */
+}
+
+
+/* User Info (Now only Total Ads Viewed) */
+.user-info p {
+    font-size: 1.1em;
+    margin: 5px 0;
+    color: var(--secondary-text-color);
+}
+
+.user-info span {
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+/* Date/Time Info (Smaller and aligned right) */
+.datetime-info {
+    margin-bottom: 15px;
+    padding: 10px 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    text-align: right; /* Aligned to the right */
+}
+
+.datetime-info p {
+    font-size: 0.9em; /* Smaller font size */
+    margin: 5px 0;
+    color: var(--secondary-text-color);
+}
+
+.datetime-info span {
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+
+/* Ad Section */
+.ad-section {
+    background-color: var(--bg-color);
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+}
+
+.ad-placeholder {
+    min-height: 150px;
+    background-color: #f0f0f0; /* Default placeholder color */
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-style: italic;
+    color: var(--secondary-text-color);
+    margin-bottom: 20px;
+}
+
+.dark-mode .ad-placeholder {
+    background-color: #3a3a3a; /* Dark mode placeholder color */
+}
+
+.timer-container {
+    margin-top: 15px;
+    margin-bottom: 20px;
+}
+
+.timer-container p {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: var(--text-color);
+    margin-bottom: 10px;
+}
+
+.progress-bar-container {
+    width: 100%;
+    background-color: var(--secondary-btn-bg);
+    border-radius: 5px;
+    height: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background-color: var(--progress-bar-color);
+    border-radius: 5px;
+    transition: width 0.1s linear; /* Smooth progress bar animation */
+}
+
+.status-message {
+    margin-top: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.button-group {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    flex: 1; /* Make buttons take equal width */
+}
+
+.btn.primary {
+    background-color: var(--primary-btn-bg);
+    color: var(--primary-btn-text);
+}
+
+.btn.primary:hover {
+    background-color: #3a7bd2; /* Darker shade for hover */
+    transform: translateY(-2px);
+}
+
+.btn.secondary {
+    background-color: var(--secondary-btn-bg);
+    color: var(--secondary-btn-text);
+}
+
+.btn.secondary:hover {
+    background-color: #d0d0d0; /* Darker shade for hover */
+    transform: translateY(-2px);
+}
+
+.dark-mode .btn.secondary:hover {
+    background-color: #555555; /* Darker shade for dark mode hover */
+}
+
+.btn:disabled {
+    background-color: #cccccc !important;
+    color: #999999 !important;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Limits Info */
+.limits-info {
+    margin-top: 15px;
+    font-size: 1em;
+    color: var(--secondary-text-color);
+}
+
+.limits-info p {
+    margin: 5px 0;
+}
+
+.cooldown-message {
+    color: #FF5733; /* Orange-red for cooldown */
+    font-weight: bold;
+}
+
+/* Pop-up Styles */
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* Default hidden state */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 1000; /* Ensure it's on top of other content */
+}
+
+.popup.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.popup-content {
+    padding: 20px 30px;
+    border-radius: 8px;
+    font-size: 1.2em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Added for better visibility */
+}
+
+.popup-content.success {
+    background-color: var(--success-popup-bg);
+    color: var(--success-popup-text);
+}
+
+.popup-content.error {
+    background-color: var(--error-popup-bg);
+    color: var(--error-popup-text);
+}
+
+/* Warning Popup Styles */
+.popup-content.warning {
+    background-color: var(--warning-popup-bg);
+    color: var(--warning-popup-text);
+    border: 1px solid var(--warning-popup-border);
+}
+
+
+.checkmark {
+    font-size: 1.5em;
+    margin-right: 5px;
+}
+
+/* Reset Button Specific Styles */
+.reset-section {
+    margin-top: 30px; /* Space from above sections */
+    padding-top: 20px; /* Padding above the button */
+    border-top: 1px solid var(--border-color); /* Thin line above button */
+}
+
+.btn.reset-btn {
+    background-color: #dc3545; /* Red color */
+    color: var(--primary-btn-text); /* White text */
+    width: auto; /* Adjust width to content */
+    padding: 12px 30px; /* More padding */
+    font-size: 1.1em;
+    font-weight: bold;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+}
+
+.btn.reset-btn:hover {
+    background-color: #c82333; /* Darker red on hover */
+    transform: translateY(-2px);
+}
+
+.dark-mode .btn.reset-btn {
+    background-color: #dc3545; /* Red color in dark mode */
+}
+
+.dark-mode .btn.reset-btn:hover {
+    background-color: #c82333; /* Darker red in dark mode on hover */
+}
+
+/* NEW: Styles for the Reset Warning Message */
+.status-message.reset-warning {
+    color: #dc3545; /* Red color */
+    font-size: 1.2em; /* Slightly larger font */
+    font-weight: bold; /* Bold text */
+    padding: 10px;
+    border: 1px solid #dc3545; /* Red border */
+    background-color: #f8d7da; /* Light red background */
+    border-radius: 5px;
+    margin-top: 15px;
+}
+
+.dark-mode .status-message.reset-warning {
+    background-color: #8b0000; /* Dark red background for dark mode */
+    color: #ffffff; /* White text */
+    border-color: #ff0000; /* Bright red border */
+}
+
+/* Optional: Style for a success message if you use it separately for consistency */
+.status-message.success-message {
+    color: #155724; /* Dark green */
+    background-color: #D4EDDA; /* Light green */
+    border: 1px solid #c3e6cb;
+}
+
+.dark-mode .status-message.success-message {
+    color: #ffffff;
+    background-color: #28a745;
+    border-color: #218838;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .app-container {
+        margin: 10px;
+        padding: 20px;
+    }
+
+    .app-title {
+        font-size: 1.8em;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 1em;
+    }
+
+    .popup-content {
+        font-size: 1em;
+        padding: 15px 25px;
+    }
+
+    .status-message.reset-warning {
+        font-size: 1em; /* Smaller font for warning on small screens */
+        padding: 8px;
+    }
+}

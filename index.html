@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ad Viewing - Telegram Mini App</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1 class="app-title">Ad Viewing</h1>
+            <div class="theme-toggle">
+                <span class="icon sun-icon">☀️</span>
+                <label class="switch">
+                    <input type="checkbox" id="themeToggle">
+                    <span class="slider round"></span>
+                </label>
+                <span class="icon moon-icon">🌙</span>
+            </div>
+        </div>
+
+        <div class="welcome-user">
+            <p>Hello: <span id="userName">Guest</span></p>
+            <p class="user-id-display">Your User ID: <span id="userId">Loading...</span></p>
+        </div>
+
+        <div class="datetime-info">
+            <p>Current Date: <span id="currentDate">Loading...</span></p>
+            <p>Current Time: <span id="currentTime">Loading...</span></p>
+        </div>
+
+        <div class="user-info">
+            <p>Total Ads Viewed: <span id="totalAdsViewed">0</span></p>
+        </div>
+
+        <div class="ad-section">
+            <div id="adDisplay" class="ad-placeholder">
+                <p>Click 'View Ad' to start.</p>
+                </div>
+
+            <div id="timerContainer" class="timer-container" style="display: none;">
+                <p>Please wait: <span id="timer">15</span> seconds</p>
+                <div class="progress-bar-container">
+                    <div id="progressBar" class="progress-bar"></div>
+                </div>
+            </div>
+
+            <div id="statusMessage" class="status-message" style="display: none;"></div>
+
+            <div class="button-group">
+                <button id="viewAdBtn" class="btn primary">View Ad</button>
+                <button id="closeAppBtn" class="btn secondary">Close App</button>
+            </div>
+        </div>
+
+        <div class="limits-info">
+            <p>Daily Ad Limit: <span id="dailyAdCount">0</span>/<span id="maxDailyAds">20</span></p>
+            <p id="cooldownMessage" class="cooldown-message" style="display: none;">Next Ad Available in: <span id="cooldownTimer">0</span> seconds</p>
+        </div>
+
+        <div id="successPopup" class="popup" style="display: none;">
+            <div class="popup-content success">
+                <span class="checkmark">✔</span> Ad Viewed Successfully!
+            </div>
+        </div>
+
+        <div id="noAdsPopup" class="popup" style="display: none;">
+            <div class="popup-content error">
+                No Ads Available. Please try again tomorrow!
+            </div>
+        </div>
+
+        <div id="noInternetPopup" class="popup" style="display: none;">
+            <div class="popup-content error">
+                No Internet Connection. Please check your internet connection and try again.
+            </div>
+        </div>
+
+        <div id="vpnWarningPopup" class="popup" style="display: none;">
+            <div class="popup-content warning">
+                VPN/Proxy Detected! Ad cannot be viewed successfully. Please disable VPN.
+            </div>
+        </div>
+        
+        <div class="reset-section">
+            <button id="resetAllDataBtn" class="btn reset-btn">Reset All Data</button>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html><!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ad Viewing - Telegram Mini App</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1 class="app-title">Ad Viewing</h1>
+            <div class="theme-toggle">
+                <span class="icon sun-icon">☀️</span>
+                <label class="switch">
+                    <input type="checkbox" id="themeToggle">
+                    <span class="slider round"></span>
+                </label>
+                <span class="icon moon-icon">🌙</span>
+            </div>
+        </div>
+
+        <div class="welcome-user">
+            <p>Hello: <span id="userName">Guest</span></p>
+            <p class="user-id-display">Your User ID: <span id="userId">Loading...</span></p>
+        </div>
+
+        <div class="datetime-info">
+            <p>Current Date: <span id="currentDate">Loading...</span></p>
+            <p>Current Time: <span id="currentTime">Loading...</span></p>
+        </div>
+
+        <div class="user-info">
+            <p>Total Ads Viewed: <span id="totalAdsViewed">0</span></p>
+        </div>
+
+        <div class="ad-section">
+            <div id="adDisplay" class="ad-placeholder">
+                <p>Click 'View Ad' to start.</p>
+                </div>
+
+            <div id="timerContainer" class="timer-container" style="display: none;">
+                <p>Please wait: <span id="timer">15</span> seconds</p>
+                <div class="progress-bar-container">
+                    <div id="progressBar" class="progress-bar"></div>
+                </div>
+            </div>
+
+            <div id="statusMessage" class="status-message" style="display: none;"></div>
+
+            <div class="button-group">
+                <button id="viewAdBtn" class="btn primary">View Ad</button>
+                <button id="closeAppBtn" class="btn secondary">Close App</button>
+            </div>
+        </div>
+
+        <div class="limits-info">
+            <p>Daily Ad Limit: <span id="dailyAdCount">0</span>/<span id="maxDailyAds">20</span></p>
+            <p id="cooldownMessage" class="cooldown-message" style="display: none;">Next Ad Available in: <span id="cooldownTimer">0</span> seconds</p>
+        </div>
+
+        <div id="successPopup" class="popup" style="display: none;">
+            <div class="popup-content success">
+                <span class="checkmark">✔</span> Ad Viewed Successfully!
+            </div>
+        </div>
+
+        <div id="noAdsPopup" class="popup" style="display: none;">
+            <div class="popup-content error">
+                No Ads Available. Please try again tomorrow!
+            </div>
+        </div>
+
+        <div id="noInternetPopup" class="popup" style="display: none;">
+            <div class="popup-content error">
+                No Internet Connection. Please check your internet connection and try again.
+            </div>
+        </div>
+
+        <div id="vpnWarningPopup" class="popup" style="display: none;">
+            <div class="popup-content warning">
+                VPN/Proxy Detected! Ad cannot be viewed successfully. Please disable VPN.
+            </div>
+        </div>
+        
+        <div class="reset-section">
+            <button id="resetAllDataBtn" class="btn reset-btn">Reset All Data</button>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
