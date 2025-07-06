@@ -5,6 +5,9 @@ const COOLDOWN_DURATION = 5; // seconds
 const BEEP_SOUND_URL = 'sounds/beep.wav'; // Make sure you have a 'sounds' folder with beep.wav
 const AD_URL = 'https://www.profitableratecpm.com/wt3cf24rv?key=20dc1dbba749e453add6a9fa9003303e';
 
+// New: Reset delay duration (3 minutes)
+const RESET_DELAY_DURATION = 3 * 60; // 3 minutes in seconds
+
 let timerInterval;
 let cooldownInterval;
 let currentAdTime = AD_DURATION;
@@ -12,6 +15,8 @@ let isAdPlaying = false;
 let beepSound;
 let dateTimeInterval;
 let isVpnDetected = false; // Flag to track VPN detection
+let resetDelayInterval; // New: Global variable for the reset countdown interval
+
 
 // --- DOM Elements ---
 const userIdSpan = document.getElementById('userId');
@@ -28,133 +33,66 @@ const timerContainer = document.getElementById('timerContainer');
 const statusMessageDiv = document.getElementById('statusMessage');
 const cooldownMessageDiv = document.getElementById('cooldownMessage');
 const cooldownTimerSpan = document.getElementById('cooldownTimer');
+const themeToggle = document.getElementById('themeToggle');
+const currentDateSpan = document.getElementById('currentDate');
+const currentTimeSpan = document.getElementById('currentTime');
 const successPopup = document.getElementById('successPopup');
 const noAdsPopup = document.getElementById('noAdsPopup');
 const noInternetPopup = document.getElementById('noInternetPopup');
 const vpnWarningPopup = document.getElementById('vpnWarningPopup');
-const themeToggle = document.getElementById('themeToggle');
-const resetAllDataBtn = document.getElementById('resetAllDataBtn'); // NEW: Reset All Data Button
+const resetAllDataBtn = document.getElementById('resetAllDataBtn');
 
-// DOM elements for date and time
-const currentDateSpan = document.getElementById('currentDate');
-const currentTimeSpan = document.getElementById('currentTime');
+// New: DOM elements for reset countdown
+const resetCountdownMessageDiv = document.getElementById('resetCountdownMessage');
+const resetCountdownTimerSpan = document.getElementById('resetCountdownTimer');
+
 
 // --- Local Storage Keys ---
 const LS_TOTAL_ADS_VIEWED = 'totalAdsViewed';
 const LS_DAILY_AD_COUNT = 'dailyAdCount';
 const LS_LAST_AD_VIEW_DATE = 'lastAdViewDate';
 const LS_LAST_AD_VIEW_TIMESTAMP = 'lastAdViewTimestamp';
-const LS_THEME = 'themePreference';
+const LS_THEME = 'appTheme';
+const LS_LAST_RESET_TIMESTAMP = 'lastResetTimestamp'; // New: For reset cooldown
+
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     initTelegramWebApp();
-    loadThemePreference();
-    checkInternetConnection();
-
-    try {
-        beepSound = new Audio(BEEP_SOUND_URL);
-        beepSound.load();
-    } catch (e) {
-        console.error("Error loading beep sound:", e);
-    }
-
-    maxDailyAdsSpan.textContent = DAILY_AD_LIMIT;
-
+    loadTheme();
     loadAdData();
-    checkDailyLimitAndCooldown();
-
     updateDateTime();
-    dateTimeInterval = setInterval(updateDateTime, 1000);
-
+    checkDailyLimitAndCooldown();
+    // checkResetCooldown(); // Removed: Reset cooldown is now a delay within reset function
+    
+    // Add event listeners
     viewAdBtn.addEventListener('click', handleViewAd);
-    closeAppBtn.addEventListener('click', handleCloseApp);
+    // closeAppBtn.addEventListener('click', handleCloseApp); // Close app button is not in index.html
     themeToggle.addEventListener('change', toggleTheme);
-    resetAllDataBtn.addEventListener('click', handleResetAllData); // NEW: Add event listener for reset button
-
-    window.addEventListener('online', checkInternetConnection);
-    window.addEventListener('offline', checkInternetConnection);
+    resetAllDataBtn.addEventListener('click', handleResetAllData);
 });
 
-// --- Telegram Web App API Initialization ---
+// --- Telegram Web App Integration ---
 function initTelegramWebApp() {
     if (window.Telegram && window.Telegram.WebApp) {
-        const WebApp = window.Telegram.WebApp;
-        WebApp.ready();
-
-        if (WebApp.initDataUnsafe && WebApp.initDataUnsafe.user) {
-            userIdSpan.textContent = WebApp.initDataUnsafe.user.id;
-            let userName = '';
-            if (WebApp.initDataUnsafe.user.first_name) {
-                userName += WebApp.initDataUnsafe.user.first_name;
-            }
-            if (WebApp.initDataUnsafe.user.last_name) {
-                userName += ' ' + WebApp.initDataUnsafe.user.last_name;
-            }
-            userNameSpan.textContent = userName || 'Guest';
+        Telegram.WebApp.ready();
+        const user = Telegram.WebApp.initDataUnsafe.user;
+        if (user) {
+            userNameSpan.textContent = user.first_name || 'Guest';
+            userIdSpan.textContent = user.id || 'N/A';
         } else {
-            userIdSpan.textContent = 'N/A (Not in Telegram Web App)';
             userNameSpan.textContent = 'Guest';
-            console.warn("Telegram Web App API not available. Running in standalone mode.");
-            document.body.classList.add('light-mode');
+            userIdSpan.textContent = 'N/A';
         }
-
-        WebApp.onEvent('themeChanged', () => {
-            applyTelegramTheme(WebApp.themeParams);
-        });
-        applyTelegramTheme(WebApp.themeParams);
     } else {
-        userIdSpan.textContent = 'Web App Not Initialized';
-        userNameSpan.textContent = 'Guest';
-        console.warn("Telegram Web App API not available. Running in standalone mode.");
-        document.body.classList.add('light-mode');
+        console.warn("Telegram Web App SDK not found.");
+        userNameSpan.textContent = 'Guest (SDK Not Found)';
+        userIdSpan.textContent = 'N/A';
     }
 }
 
 // --- Theme Management ---
-function applyTelegramTheme(themeParams) {
-    if (!themeParams) return;
-    document.documentElement.style.setProperty('--tg-theme-bg-color', themeParams.bg_color || '#ffffff');
-    document.documentElement.style.setProperty('--tg-theme-text-color', themeParams.text_color || '#000000');
-    document.documentElement.style.setProperty('--tg-theme-hint-color', themeParams.hint_color || '#aaaaaa');
-    document.documentElement.style.setProperty('--tg-theme-link-color', themeParams.link_color || '#2481cc');
-    document.documentElement.style.setProperty('--tg-theme-button-color', themeParams.button_color || '#2481cc');
-    document.documentElement.style.setProperty('--tg-theme-button-text-color', themeParams.button_text_color || '#ffffff');
-
-    if (themeParams.bg_color && isColorDark(themeParams.bg_color)) {
-        document.body.classList.add('dark-mode');
-        themeToggle.checked = true;
-    } else {
-        document.body.classList.remove('dark-mode');
-        themeToggle.checked = false;
-    }
-    saveThemePreference();
-}
-
-function isColorDark(hexColor) {
-    if (!hexColor || hexColor.length < 7) return false;
-    const r = parseInt(hexColor.substring(1, 3), 16);
-    const g = parseInt(hexColor.substring(3, 5), 16);
-    const b = parseInt(hexColor.substring(5, 7), 16);
-    const hsp = Math.sqrt(0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b));
-    return hsp < 127.5;
-}
-
-function toggleTheme() {
-    if (themeToggle.checked) {
-        document.body.classList.add('dark-mode');
-    } else {
-        document.body.classList.remove('dark-mode');
-    }
-    saveThemePreference();
-}
-
-function saveThemePreference() {
-    const isDarkMode = document.body.classList.contains('dark-mode');
-    localStorage.setItem(LS_THEME, isDarkMode ? 'dark' : 'light');
-}
-
-function loadThemePreference() {
+function loadTheme() {
     const savedTheme = localStorage.getItem(LS_THEME);
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
@@ -165,259 +103,234 @@ function loadThemePreference() {
     }
 }
 
-// --- Date and Time Management ---
-function updateDateTime() {
-    const now = new Date();
-    const optionsDate = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        timeZone: 'Asia/Colombo'
-    };
-    const optionsTime = {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false,
-        timeZone: 'Asia/Colombo'
-    };
-
-    const dateString = now.toLocaleDateString('en-LK', optionsDate);
-    const timeString = now.toLocaleTimeString('en-LK', optionsTime);
-
-    currentDateSpan.textContent = dateString;
-    currentTimeSpan.textContent = timeString;
-}
-
-
-// --- Internet Connection Check ---
-function checkInternetConnection() {
-    if (navigator.onLine) {
-        hidePopup(noInternetPopup);
-        if (!isVpnDetected) {
-            viewAdBtn.disabled = false;
-        }
-        checkDailyLimitAndCooldown();
+function toggleTheme() {
+    if (themeToggle.checked) {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem(LS_THEME, 'dark');
     } else {
-        showPopup(noInternetPopup, 0);
-        viewAdBtn.disabled = true;
-        stopTimer();
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem(LS_THEME, 'light');
     }
 }
 
-// --- Ad Data Management (Local Storage) ---
+// --- Date and Time ---
+function updateDateTime() {
+    const optionsDate = { year: 'numeric', month: 'long', day: 'numeric' };
+    const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+    
+    // Get current time in Sri Lanka (Asia/Colombo)
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString('en-US', { ...optionsDate, timeZone: 'Asia/Colombo' });
+    const formattedTime = now.toLocaleTimeString('en-US', { ...optionsTime, timeZone: 'Asia/Colombo' });
+
+    currentDateSpan.textContent = formattedDate;
+    currentTimeSpan.textContent = formattedTime;
+}
+
+// Update date and time every second
+dateTimeInterval = setInterval(updateDateTime, 1000);
+
+
+// --- Ad Data Loading and Saving ---
 function loadAdData() {
+    const today = new Date().toLocaleDateString();
+    const lastAdViewDate = localStorage.getItem(LS_LAST_AD_VIEW_DATE);
+
     let totalAds = parseInt(localStorage.getItem(LS_TOTAL_ADS_VIEWED)) || 0;
-    totalAdsViewedSpan.textContent = totalAds;
-
     let dailyCount = parseInt(localStorage.getItem(LS_DAILY_AD_COUNT)) || 0;
-    let lastViewDate = localStorage.getItem(LS_LAST_AD_VIEW_DATE);
-    const today = new Date().toDateString();
 
-    if (lastViewDate !== today) {
-        dailyCount = 0;
-        localStorage.setItem(LS_DAILY_AD_COUNT, 0);
+    if (lastAdViewDate !== today) {
+        dailyCount = 0; // Reset daily count for a new day
         localStorage.setItem(LS_LAST_AD_VIEW_DATE, today);
     }
-    dailyAdCountSpan.textContent = dailyCount;
-}
 
-function incrementAdCount() {
-    let totalAds = parseInt(localStorage.getItem(LS_TOTAL_ADS_VIEWED)) || 0;
-    totalAds++;
-    localStorage.setItem(LS_TOTAL_ADS_VIEWED, totalAds);
     totalAdsViewedSpan.textContent = totalAds;
-
-    let dailyCount = parseInt(localStorage.getItem(LS_DAILY_AD_COUNT)) || 0;
-    dailyCount++;
-    localStorage.setItem(LS_DAILY_AD_COUNT, dailyCount);
     dailyAdCountSpan.textContent = dailyCount;
-
-    localStorage.setItem(LS_LAST_AD_VIEW_DATE, new Date().toDateString());
-    localStorage.setItem(LS_LAST_AD_VIEW_TIMESTAMP, Date.now());
+    maxDailyAdsSpan.textContent = DAILY_AD_LIMIT;
 }
 
-// --- Daily Limit and Cooldown Check ---
-function checkDailyLimitAndCooldown() {
-    const dailyCount = parseInt(localStorage.getItem(LS_DAILY_AD_COUNT)) || 0;
-    const lastViewTimestamp = parseInt(localStorage.getItem(LS_LAST_AD_VIEW_TIMESTAMP)) || 0;
-    const currentTime = Date.now();
-    const timeSinceLastAd = (currentTime - lastViewTimestamp) / 1000;
-
-    if (!navigator.onLine) {
-        viewAdBtn.disabled = true;
-        return;
-    }
-
-    if (dailyCount >= DAILY_AD_LIMIT) {
-        viewAdBtn.disabled = true;
-        showPopup(noAdsPopup, 3000);
-        statusMessageDiv.style.display = 'none';
-        cooldownMessageDiv.style.display = 'none';
-        adDisplay.innerHTML = `<p>Daily ad limit reached. Come back tomorrow!</p>`;
-        timerContainer.style.display = 'none';
-        return;
-    }
-
-    if (isVpnDetected) {
-        viewAdBtn.disabled = true;
-        cooldownMessageDiv.style.display = 'none';
-        return;
-    }
-
-    if (timeSinceLastAd < COOLDOWN_DURATION) {
-        viewAdBtn.disabled = true;
-        cooldownMessageDiv.style.display = 'block';
-        let remainingCooldown = Math.ceil(COOLDOWN_DURATION - timeSinceLastAd);
-        cooldownTimerSpan.textContent = remainingCooldown;
-
-        clearInterval(cooldownInterval);
-        cooldownInterval = setInterval(() => {
-            remainingCooldown--;
-            cooldownTimerSpan.textContent = remainingCooldown;
-            if (remainingCooldown <= 0) {
-                clearInterval(cooldownInterval);
-                cooldownMessageDiv.style.display = 'none';
-                viewAdBtn.disabled = false;
-                if (isVpnDetected) viewAdBtn.disabled = true;
-            }
-        }, 1000);
-    } else {
-        viewAdBtn.disabled = false;
-        cooldownMessageDiv.style.display = 'none';
-    }
+function saveAdData(totalAds, dailyCount) {
+    localStorage.setItem(LS_TOTAL_ADS_VIEWED, totalAds);
+    localStorage.setItem(LS_DAILY_AD_COUNT, dailyCount);
+    localStorage.setItem(LS_LAST_AD_VIEW_DATE, new Date().toLocaleDateString());
+    localStorage.setItem(LS_LAST_AD_VIEW_TIMESTAMP, Date.now());
+    loadAdData(); // Update UI
 }
 
 // --- Ad Viewing Logic ---
 function handleViewAd() {
-    if (isAdPlaying) return;
+    if (isAdPlaying) return; // Prevent multiple clicks during ad playback
+
+    // Check internet connection
     if (!navigator.onLine) {
-        showPopup(noInternetPopup, 3000);
-        return;
-    }
-    if (viewAdBtn.disabled) {
-        checkDailyLimitAndCooldown();
+        showPopup(noInternetPopup, 3000); // Show for 3 seconds
         return;
     }
 
-    isAdPlaying = true;
-    isVpnDetected = false;
-    hidePopup(vpnWarningPopup);
-
-    viewAdBtn.disabled = true;
-    closeAppBtn.disabled = true;
-
-    adDisplay.innerHTML = `
-        <p>Loading Ad...</p>
-        <iframe id="adIframe" src="${AD_URL}"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowfullscreen
-                style="width:100%; height:250px; border-radius:8px; display:block;">
-        </iframe>
-    `;
-
-    timerContainer.style.display = 'block';
-    statusMessageDiv.style.display = 'none';
-    currentAdTime = AD_DURATION;
-    timerSpan.textContent = currentAdTime;
-    progressBar.style.width = '0%';
-
-    startTimer();
-
-    setTimeout(() => {
-        checkAdContentForVPN();
-    }, 2000);
-}
-
-function startTimer() {
-    clearInterval(timerInterval);
-
-    timerInterval = setInterval(() => {
+    // Check for VPN/Proxy (simple check, not foolproof)
+    // This is a basic example and might not be accurate for all cases
+    checkVpnProxy().then(isVpn => {
+        isVpnDetected = isVpn;
         if (isVpnDetected) {
-            stopTimer();
+            showPopup(vpnWarningPopup, 5000); // Show for 5 seconds
             return;
         }
 
+        let dailyCount = parseInt(localStorage.getItem(LS_DAILY_AD_COUNT)) || 0;
+
+        if (dailyCount >= DAILY_AD_LIMIT) {
+            showPopup(noAdsPopup, 3000); // Show for 3 seconds
+            return;
+        }
+
+        // Check cooldown
+        const lastAdViewTimestamp = parseInt(localStorage.getItem(LS_LAST_AD_VIEW_TIMESTAMP)) || 0;
+        const timeSinceLastAd = (Date.now() - lastAdViewTimestamp) / 1000; // in seconds
+
+        if (timeSinceLastAd < COOLDOWN_DURATION) {
+            updateCooldownMessage();
+            return;
+        }
+
+        startAdPlayback();
+    });
+}
+
+function startAdPlayback() {
+    isAdPlaying = true;
+    viewAdBtn.disabled = true;
+    adDisplay.innerHTML = `<iframe src="${AD_URL}" frameborder="0" allowfullscreen></iframe>`; // Embed ad content
+    timerContainer.style.display = 'block';
+    statusMessageDiv.style.display = 'block';
+    statusMessageDiv.textContent = 'Viewing ad...';
+    progressBar.style.width = '0%';
+    currentAdTime = AD_DURATION;
+    timerSpan.textContent = currentAdTime;
+
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
         currentAdTime--;
         timerSpan.textContent = currentAdTime;
         const progress = ((AD_DURATION - currentAdTime) / AD_DURATION) * 100;
         progressBar.style.width = `${progress}%`;
 
         if (currentAdTime <= 0) {
-            stopTimer();
+            clearInterval(timerInterval);
             adViewedSuccessfully();
         }
     }, 1000);
 }
 
-function stopTimer() {
-    clearInterval(timerInterval);
-    isAdPlaying = false;
-    closeAppBtn.disabled = false;
-    timerContainer.style.display = 'none';
-    if (!isVpnDetected) {
-        checkDailyLimitAndCooldown();
-    }
-}
-
-function checkAdContentForVPN() {
-    const adContent = adDisplay.textContent || adDisplay.innerText;
-    const proxyDetectedMessage = "Anonymous Proxy detected.";
-
-    if (adContent.includes(proxyDetectedMessage)) {
-        isVpnDetected = true;
-        stopTimer();
-        viewAdBtn.disabled = true;
-        closeAppBtn.disabled = false;
-        showPopup(vpnWarningPopup, 0);
-        adDisplay.innerHTML = `<p>${proxyDetectedMessage} Ad cannot be viewed successfully. Please disable VPN and try again.</p>`;
-        statusMessageDiv.style.display = 'none';
-        console.warn("VPN/Proxy detected! Ad viewing halted.");
-
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.sendData) {
-             window.Telegram.WebApp.sendData(JSON.stringify({ type: 'vpn_detected', userId: userIdSpan.textContent }));
-        }
-    } else {
-        hidePopup(vpnWarningPopup);
-        isVpnDetected = false;
-        checkDailyLimitAndCooldown();
-    }
-}
-
-
 function adViewedSuccessfully() {
-    if (!isVpnDetected) {
-        incrementAdCount();
-        showPopup(successPopup, 2000);
+    isAdPlaying = false;
+    adDisplay.innerHTML = `<p>Click 'View Ad' to start.</p>`;
+    timerContainer.style.display = 'none';
+    statusMessageDiv.style.display = 'none';
 
-        if (beepSound) {
-            beepSound.play().catch(e => console.error("Error playing sound:", e));
-        }
+    let totalAds = parseInt(localStorage.getItem(LS_TOTAL_ADS_VIEWED)) || 0;
+    let dailyCount = parseInt(localStorage.getItem(LS_DAILY_AD_COUNT)) || 0;
 
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
-            window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-        }
+    totalAds++;
+    dailyCount++;
+    saveAdData(totalAds, dailyCount);
 
-        adDisplay.innerHTML = `<p>Ad finished. Click 'View Ad' for next.</p>`;
-    } else {
-        showPopup(vpnWarningPopup, 0);
-        adDisplay.innerHTML = `<p>Ad viewing failed due to VPN/Proxy. Please disable VPN.</p>`;
+    if (beepSound) {
+        beepSound.play().catch(e => console.error("Error playing sound:", e));
     }
-    checkDailyLimitAndCooldown();
+    if (window.Telegram && window.Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+        Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+    }
+
+    showPopup(successPopup, 2000); // Show for 2 seconds
+
+    // Start cooldown
+    startCooldown();
 }
+
+// --- Cooldown Logic ---
+function startCooldown() {
+    let remainingCooldown = COOLDOWN_DURATION;
+    cooldownMessageDiv.style.display = 'block';
+    viewAdBtn.disabled = true;
+
+    clearInterval(cooldownInterval);
+    cooldownInterval = setInterval(() => {
+        remainingCooldown--;
+        cooldownTimerSpan.textContent = remainingCooldown;
+
+        if (remainingCooldown <= 0) {
+            clearInterval(cooldownInterval);
+            cooldownMessageDiv.style.display = 'none';
+            checkDailyLimitAndCooldown(); // Re-enable if limit not reached
+        }
+    }, 1000);
+}
+
+function checkDailyLimitAndCooldown() {
+    const dailyCount = parseInt(localStorage.getItem(LS_DAILY_AD_COUNT)) || 0;
+    const lastAdViewTimestamp = parseInt(localStorage.getItem(LS_LAST_AD_VIEW_TIMESTAMP)) || 0;
+    const timeSinceLastAd = (Date.now() - lastAdViewTimestamp) / 1000;
+
+    if (dailyCount >= DAILY_AD_LIMIT) {
+        viewAdBtn.disabled = true;
+        cooldownMessageDiv.style.display = 'none'; // Hide cooldown if limit reached
+        statusMessageDiv.style.display = 'block';
+        statusMessageDiv.textContent = 'Daily ad limit reached!';
+        return;
+    }
+
+    if (timeSinceLastAd < COOLDOWN_DURATION) {
+        startCooldown(); // Resume cooldown if page was reloaded during cooldown
+    } else {
+        viewAdBtn.disabled = false;
+        cooldownMessageDiv.style.display = 'none';
+        statusMessageDiv.style.display = 'none';
+    }
+}
+
+// --- VPN/Proxy Detection (Basic Example) ---
+async function checkVpnProxy() {
+    try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        const ipAddress = data.ip;
+
+        // This is a placeholder for a real VPN detection service
+        // For production, you'd integrate with a dedicated IP intelligence API
+        const vpnCheckResponse = await fetch(`https://vpnapi.io/api/${ipAddress}?key=YOUR_VPN_API_KEY`); // Replace with actual API and key
+        const vpnCheckData = await vpnCheckResponse.json();
+
+        return vpnCheckData.security.vpn || vpnCheckData.security.proxy;
+    } catch (error) {
+        console.error("Error checking VPN/Proxy:", error);
+        // If there's an error, assume no VPN for now to allow app to function
+        return false;
+    }
+}
+
 
 // --- Popup Management ---
-function showPopup(popupElement, duration = 2000) {
-    hidePopup(successPopup);
-    hidePopup(noAdsPopup);
-    hidePopup(noInternetPopup);
-    hidePopup(vpnWarningPopup);
+function showPopup(popupElement, duration, message = null) {
+    // Default text for successPopup if no specific message is provided
+    if (popupElement === successPopup && message === null) {
+        popupElement.querySelector('.popup-content').innerHTML = `<span class="checkmark"> </span> Ad Viewed Successfully!`;
+    } else if (message !== null) {
+        // For other popups or if a specific message is provided for successPopup
+        const popupContent = popupElement.querySelector('.popup-content');
+        if (popupContent) {
+            // If it's the success popup, retain the checkmark
+            if (popupElement === successPopup) {
+                popupContent.innerHTML = `<span class="checkmark"> </span> ${message}`;
+            } else {
+                popupContent.textContent = message; // For other popups, just set text
+            }
+        }
+    }
 
     popupElement.classList.add('show');
     if (duration > 0) {
         setTimeout(() => {
-            popupElement.classList.remove('show');
+            hidePopup(popupElement);
         }, duration);
     }
 }
@@ -426,26 +339,63 @@ function hidePopup(popupElement) {
     popupElement.classList.remove('show');
 }
 
+// --- Helper function for time formatting (MM:SS) ---
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+
 // --- Data Reset Logic ---
+function performResetLogic() {
+    // Clear all relevant Local Storage items
+    localStorage.removeItem(LS_TOTAL_ADS_VIEWED);
+    localStorage.removeItem(LS_DAILY_AD_COUNT);
+    localStorage.removeItem(LS_LAST_AD_VIEW_DATE);
+    localStorage.removeItem(LS_LAST_AD_VIEW_TIMESTAMP);
+    // localStorage.removeItem(LS_THEME); // Uncomment if you want to reset theme preference too
+
+    // Reload ad data and update UI
+    loadAdData(); // This will reset daily count to 0 and total ads to 0
+    checkDailyLimitAndCooldown(); // This will re-enable the view ad button if applicable
+
+    // Reset the ad display area to its initial state
+    adDisplay.innerHTML = `<p>Click 'View Ad' to start.</p>`;
+    timerContainer.style.display = 'none'; // Ensure timer is hidden
+    statusMessageDiv.style.display = 'none'; // Ensure status message is hidden
+}
+
 function handleResetAllData() {
     if (confirm("Are you sure you want to reset all data? This action cannot be undone.")) {
-        // Clear all relevant Local Storage items
-        localStorage.removeItem(LS_TOTAL_ADS_VIEWED);
-        localStorage.removeItem(LS_DAILY_AD_COUNT);
-        localStorage.removeItem(LS_LAST_AD_VIEW_DATE);
-        localStorage.removeItem(LS_LAST_AD_VIEW_TIMESTAMP);
-        // localStorage.removeItem(LS_THEME); // Uncomment if you want to reset theme preference too
+        resetAllDataBtn.disabled = true;
+        // Hide any other popups that might be open
+        hidePopup(successPopup);
+        hidePopup(noAdsPopup);
+        hidePopup(noInternetPopup);
+        hidePopup(vpnWarningPopup);
 
-        // Reload ad data and update UI
-        loadAdData(); // This will reset daily count to 0 and total ads to 0
-        checkDailyLimitAndCooldown(); // This will re-enable the view ad button if applicable
+        // Show reset countdown message
+        resetCountdownMessageDiv.style.display = 'block';
+        let remainingResetTime = RESET_DELAY_DURATION;
+        resetCountdownTimerSpan.textContent = formatTime(remainingResetTime);
 
-        // Reset the ad display area to its initial state
-        adDisplay.innerHTML = `<p>Click 'View Ad' to start.</p>`;
-        timerContainer.style.display = 'none'; // Ensure timer is hidden
-        statusMessageDiv.style.display = 'none'; // Ensure status message is hidden
+        clearInterval(resetDelayInterval); // Clear any previous interval
+        resetDelayInterval = setInterval(() => {
+            remainingResetTime--;
+            resetCountdownTimerSpan.textContent = formatTime(remainingResetTime);
 
-        alert("All data has been reset successfully!");
+            if (remainingResetTime <= 0) {
+                clearInterval(resetDelayInterval);
+                resetCountdownMessageDiv.style.display = 'none'; // Hide countdown message
+
+                performResetLogic(); // Perform the actual reset
+
+                // Show success popup with custom message for 5 seconds
+                showPopup(successPopup, 5000, "All data has been reset successfully!");
+                resetAllDataBtn.disabled = false; // Re-enable button
+            }
+        }, 1000);
     }
 }
 
@@ -455,6 +405,5 @@ function handleCloseApp() {
         window.Telegram.WebApp.close();
     } else {
         alert("This action only works within the Telegram Web App.");
-        console.log("Closing app (simulated for standalone mode)");
     }
 }
