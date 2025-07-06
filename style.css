@@ -416,37 +416,6 @@ input:checked + .slider:before {
     background-color: #c82333; /* Darker red in dark mode on hover */
 }
 
-/* NEW: Styles for the Reset Warning Message */
-.status-message.reset-warning {
-    color: #dc3545; /* Red color */
-    font-size: 1.2em; /* Slightly larger font */
-    font-weight: bold; /* Bold text */
-    padding: 10px;
-    border: 1px solid #dc3545; /* Red border */
-    background-color: #f8d7da; /* Light red background */
-    border-radius: 5px;
-    margin-top: 15px;
-}
-
-.dark-mode .status-message.reset-warning {
-    background-color: #8b0000; /* Dark red background for dark mode */
-    color: #ffffff; /* White text */
-    border-color: #ff0000; /* Bright red border */
-}
-
-/* Optional: Style for a success message if you use it separately for consistency */
-.status-message.success-message {
-    color: #155724; /* Dark green */
-    background-color: #D4EDDA; /* Light green */
-    border: 1px solid #c3e6cb;
-}
-
-.dark-mode .status-message.success-message {
-    color: #ffffff;
-    background-color: #28a745;
-    border-color: #218838;
-}
-
 
 /* Responsive adjustments */
 @media (max-width: 480px) {
@@ -467,10 +436,5 @@ input:checked + .slider:before {
     .popup-content {
         font-size: 1em;
         padding: 15px 25px;
-    }
-
-    .status-message.reset-warning {
-        font-size: 1em; /* Smaller font for warning on small screens */
-        padding: 8px;
     }
 }
