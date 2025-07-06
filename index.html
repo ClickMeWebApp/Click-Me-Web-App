@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="si">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,23 +12,23 @@
         <div class="header">
             <h1 class="app-title">Ad Viewing</h1>
             <div class="theme-toggle">
+                <span class="icon sun-icon"></span>
                 <label class="switch">
                     <input type="checkbox" id="themeToggle">
                     <span class="slider round"></span>
-                    <span class="icon sun-icon">&#9728;</span> <span class="icon moon-icon">&#9790;</span> </label>
+                </label>
+                <span class="icon moon-icon"></span>
             </div>
         </div>
 
-        <div class="user-datetime-container">
-            <div class="welcome-user">
-                <p>Hello: <span id="userName">Guest</span></p>
-                <p class="user-id-display">Your User ID: <span id="userId">Loading...</span></p>
-            </div>
+        <div class="welcome-user">
+            <p>Hello: <span id="userName">Guest</span></p>
+            <p class="user-id-display">Your User ID: <span id="userId">Loading...</span></p>
+        </div>
 
-            <div class="datetime-info">
-                <p>Current Date: <span id="currentDate">Loading...</span></p>
-                <p>Current Time: <span id="currentTime">Loading...</span></p>
-            </div>
+        <div class="datetime-info">
+            <p>Current Date: <span id="currentDate">Loading...</span></p>
+            <p>Current Time: <span id="currentTime">Loading...</span></p>
         </div>
 
         <div class="user-info">
@@ -36,17 +36,23 @@
         </div>
 
         <div class="ad-section">
-            <div id="adDisplay" class="ad-display">
+            <div id="adDisplay" class="ad-placeholder">
                 <p>Click 'View Ad' to start.</p>
-            </div>
+                </div>
+
             <div id="timerContainer" class="timer-container" style="display: none;">
+                <p>Please wait: <span id="timer">15</span> seconds</p>
                 <div class="progress-bar-container">
                     <div id="progressBar" class="progress-bar"></div>
                 </div>
-                <p>Time Left: <span id="timer">0</span> seconds</p>
             </div>
-            <p id="statusMessage" class="status-message" style="display: none;"></p>
-            <button id="viewAdBtn" class="btn primary-btn">View Ad</button>
+
+            <div id="statusMessage" class="status-message" style="display: none;"></div>
+
+            <div class="button-group">
+                <button id="viewAdBtn" class="btn primary">View Ad</button>
+                <button id="closeAppBtn" class="btn secondary">Close App</button>
+            </div>
         </div>
 
         <div class="limits-info">
@@ -56,7 +62,7 @@
 
         <div id="successPopup" class="popup" style="display: none;">
             <div class="popup-content success">
-                <span class="checkmark"> </span> Ad Viewed Successfully!
+                <span class="checkmark"></span> Ad Viewed Successfully!
             </div>
         </div>
 
@@ -79,9 +85,6 @@
         </div>
         
         <div class="reset-section">
-            <div id="resetCountdownMessage" style="display: none;">
-                <p>Data Resetting... Please wait: <span id="resetCountdownTimer"></span></p>
-            </div>
             <button id="resetAllDataBtn" class="btn reset-btn">Reset All Data</button>
         </div>
 

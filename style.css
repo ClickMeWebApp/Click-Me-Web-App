@@ -26,73 +26,83 @@ body.dark-mode {
     --bg-color: #1c1c1c;
     --card-bg-color: #2c2c2c;
     --text-color: #f0f0f0;
-    --secondary-text-color: #b0b0b0;
-    --primary-btn-bg: #61afef;
+    --secondary-text-color: #cccccc;
+    --primary-btn-bg: #5B8CDE;
     --primary-btn-text: #ffffff;
     --secondary-btn-bg: #444444;
     --secondary-btn-text: #f0f0f0;
-    --progress-bar-color: #61afef;
-    --success-popup-bg: #28a745;
+    --progress-bar-color: #5B8CDE;
+    --success-popup-bg: #28a745; /* Darker green for dark mode */
     --success-popup-text: #ffffff;
-    --error-popup-bg: #dc3545;
+    --error-popup-bg: #dc3545; /* Darker red for dark mode */
     --error-popup-text: #ffffff;
     --border-color: #444444;
 
     /* Warning Popup Colors (Dark Mode) */
-    --warning-popup-bg: #ffc107; /* Yellow for warning */
-    --warning-popup-text: #343a40; /* Dark text on yellow */
-    --warning-popup-border: #e0a800;
+    --warning-popup-bg: #FFC107; /* Darker yellow for dark mode */
+    --warning-popup-text: #343a40; /* Dark text for contrast */
+    --warning-popup-border: #FFD56B;
 }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
     background-color: var(--bg-color);
     color: var(--text-color);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; /* Align to top for better mobile view */
     min-height: 100vh;
-    margin: 0;
     transition: background-color 0.3s ease, color 0.3s ease;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
 .app-container {
     background-color: var(--card-bg-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    width: 90%;
+    margin: 20px;
+    width: 100%;
     max-width: 400px;
-    box-sizing: border-box; /* Include padding in the width calculation */
+    text-align: center;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Spacing between sections */
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .app-title {
+    font-size: 2em;
     margin: 0;
-    font-size: 1.8em;
-    color: var(--primary-btn-bg);
+    color: var(--text-color);
 }
 
-/* Theme Toggle Switch */
 .theme-toggle {
     display: flex;
     align-items: center;
-    gap: 10px; /* Space between switch and any other future elements */
+    gap: 8px;
 }
 
+.theme-toggle .icon {
+    font-size: 1.2em;
+    color: var(--secondary-text-color);
+}
+
+/* Toggle switch styling */
 .switch {
-    position: relative; /* Make it a positioning context */
+    position: relative;
     display: inline-block;
     width: 45px;
     height: 25px;
-    margin: 0;
 }
 
 .switch input {
@@ -108,47 +118,24 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
+    background-color: var(--secondary-btn-bg);
+    -webkit-transition: .4s;
     transition: .4s;
     border-radius: 25px;
-    z-index: 1; /* Slider background */
 }
 
-.slider:before { /* This is the knob */
+.slider:before {
     position: absolute;
     content: "";
     height: 19px;
     width: 19px;
     left: 3px;
     bottom: 3px;
-    background-color: white;
+    background-color: var(--primary-btn-bg);
+    -webkit-transition: .4s;
     transition: .4s;
     border-radius: 50%;
-    z-index: 2; /* Knob on top */
 }
-
-/* Icons inside the switch */
-.switch .icon {
-    position: absolute;
-    font-size: 0.9em; /* Adjust icon size */
-    top: 50%;
-    transform: translateY(-50%);
-    transition: opacity 0.3s ease, color 0.3s ease;
-    z-index: 0; /* Icons behind slider and knob */
-}
-
-.switch .sun-icon {
-    left: 5px; /* Position on the left side of the track */
-    color: #f39c12; /* Sun color */
-    opacity: 1; /* Visible in light mode by default */
-}
-
-.switch .moon-icon {
-    right: 5px; /* Position on the right side of the track */
-    color: #f1c40f; /* Moon color */
-    opacity: 0; /* Hidden in light mode by default */
-}
-
 
 input:checked + .slider {
     background-color: var(--primary-btn-bg);
@@ -158,110 +145,113 @@ input:focus + .slider {
     box-shadow: 0 0 1px var(--primary-btn-bg);
 }
 
-input:checked + .slider:before { /* Knob moves right */
+input:checked + .slider:before {
+    -webkit-transform: translateX(20px);
+    -ms-transform: translateX(20px);
     transform: translateX(20px);
 }
 
-/* When checked (dark mode), hide sun, show moon */
-input:checked ~ .sun-icon { /* Using general sibling selector */
-    opacity: 0;
-}
-
-input:checked ~ .moon-icon { /* Using general sibling selector */
-    opacity: 1;
-}
-
-/* Rounded sliders */
-.slider.round {
-    border-radius: 25px;
-}
-
-.slider.round:before { /* Knob rounded */
-    border-radius: 50%;
-}
-
-/* User Info and Datetime Container */
-.user-datetime-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    margin-bottom: 15px;
-    gap: 10px;
-}
-
+/* Style for the Welcome User section (Top-Left) */
 .welcome-user {
-    flex-grow: 1;
-    text-align: left;
-    margin-bottom: 0;
-    padding: 0;
+    text-align: left; /* Align text to the left */
+    margin-bottom: 10px; /* Add some space below it */
+    padding: 0 5px; /* Optional: small padding for alignment */
 }
 
+.welcome-user p {
+    font-size: 1.2em; /* Slightly larger font size for name */
+    font-weight: bold; /* Make it bold */
+    color: var(--text-color); /* Use primary text color */
+    margin: 0; /* Remove default paragraph margin */
+}
+
+.welcome-user span {
+    color: var(--primary-btn-bg); /* Use a highlight color for the name/id */
+}
+
+.welcome-user .user-id-display {
+    font-size: 0.95em; /* Slightly smaller font for user ID */
+    font-weight: normal; /* Normal weight */
+    color: var(--secondary-text-color); /* Secondary color for ID */
+    margin-top: 5px; /* Small margin above it */
+}
+
+
+/* User Info (Now only Total Ads Viewed) */
+.user-info p {
+    font-size: 1.1em;
+    margin: 5px 0;
+    color: var(--secondary-text-color);
+}
+
+.user-info span {
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+/* Date/Time Info (Smaller and aligned right) */
 .datetime-info {
-    flex-shrink: 0;
-    text-align: right;
-    margin-bottom: 0;
-    padding: 0;
-    border: none;
+    margin-bottom: 15px;
+    padding: 10px 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    text-align: right; /* Aligned to the right */
 }
 
 .datetime-info p {
-    font-size: 0.85em;
-    margin: 0;
-    color: var(--secondary-text-color);
-}
-
-
-.user-info {
-    margin-bottom: 20px;
-    color: var(--secondary-text-color);
-}
-
-.user-info p {
+    font-size: 0.9em; /* Smaller font size */
     margin: 5px 0;
+    color: var(--secondary-text-color);
 }
 
+.datetime-info span {
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+
+/* Ad Section */
 .ad-section {
     background-color: var(--bg-color);
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid var(--border-color);
 }
 
-.ad-display {
-    min-height: 100px;
-    background-color: var(--card-bg-color);
-    border: 1px solid var(--border-color);
+.ad-placeholder {
+    min-height: 150px;
+    background-color: #f0f0f0; /* Default placeholder color */
+    border-radius: 8px;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 15px;
-    font-size: 1.1em;
+    font-style: italic;
     color: var(--secondary-text-color);
-    border-radius: 8px;
-    overflow: hidden; /* For iframe or image scaling */
+    margin-bottom: 20px;
 }
 
-.ad-display iframe,
-.ad-display img {
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block; /* Remove extra space below img */
+.dark-mode .ad-placeholder {
+    background-color: #3a3a3a; /* Dark mode placeholder color */
 }
 
 .timer-container {
-    margin-bottom: 15px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+}
+
+.timer-container p {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: var(--text-color);
+    margin-bottom: 10px;
 }
 
 .progress-bar-container {
     width: 100%;
-    background-color: #e0e0e0;
+    background-color: var(--secondary-btn-bg);
     border-radius: 5px;
-    overflow: hidden;
     height: 10px;
-    margin-bottom: 10px;
+    overflow: hidden;
 }
 
 .progress-bar {
@@ -269,74 +259,91 @@ input:checked ~ .moon-icon { /* Using general sibling selector */
     width: 0%;
     background-color: var(--progress-bar-color);
     border-radius: 5px;
-    transition: width 0.1s linear; /* Smooth progress animation */
+    transition: width 0.1s linear; /* Smooth progress bar animation */
 }
 
 .status-message {
+    margin-top: 15px;
+    font-size: 1.1em;
     font-weight: bold;
-    margin-bottom: 15px;
+    color: var(--text-color);
+}
+
+.button-group {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
 }
 
 .btn {
-    padding: 10px 20px;
+    padding: 12px 25px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
+    font-size: 1.1em;
     cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.2s ease, transform 0.2s ease;
-    width: 100%;
-    box-sizing: border-box; /* Ensures padding doesn't increase total width */
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    flex: 1; /* Make buttons take equal width */
 }
 
-.btn:disabled {
-    background-color: var(--secondary-btn-bg);
-    color: var(--secondary-btn-text);
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-
-.primary-btn {
+.btn.primary {
     background-color: var(--primary-btn-bg);
     color: var(--primary-btn-text);
 }
 
-.primary-btn:hover:not(:disabled) {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+.btn.primary:hover {
+    background-color: #3a7bd2; /* Darker shade for hover */
+    transform: translateY(-2px);
 }
 
-.secondary-btn {
+.btn.secondary {
     background-color: var(--secondary-btn-bg);
     color: var(--secondary-btn-text);
 }
 
-.secondary-btn:hover:not(:disabled) {
+.btn.secondary:hover {
+    background-color: #d0d0d0; /* Darker shade for hover */
     transform: translateY(-2px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode .btn.secondary:hover {
+    background-color: #555555; /* Darker shade for dark mode hover */
+}
+
+.btn:disabled {
+    background-color: #cccccc !important;
+    color: #999999 !important;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Limits Info */
+.limits-info {
+    margin-top: 15px;
+    font-size: 1em;
+    color: var(--secondary-text-color);
+}
+
+.limits-info p {
+    margin: 5px 0;
 }
 
 .cooldown-message {
-    color: var(--secondary-text-color);
-    font-size: 0.9em;
-    margin-top: 10px;
+    color: #FF5733; /* Orange-red for cooldown */
+    font-weight: bold;
 }
 
-/* Popups */
+/* Pop-up Styles */
 .popup {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: var(--card-bg-color);
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
+    /* Default hidden state */
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
-    text-align: center;
-    min-width: 250px;
+    z-index: 1000; /* Ensure it's on top of other content */
 }
 
 .popup.show {
@@ -345,29 +352,27 @@ input:checked ~ .moon-icon { /* Using general sibling selector */
 }
 
 .popup-content {
+    padding: 20px 30px;
+    border-radius: 8px;
+    font-size: 1.2em;
+    font-weight: bold;
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 1.1em;
-    font-weight: bold;
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Added for better visibility */
 }
 
 .popup-content.success {
     background-color: var(--success-popup-bg);
     color: var(--success-popup-text);
-    border: 1px solid #218838;
-    padding: 10px;
-    border-radius: 5px;
 }
 
 .popup-content.error {
     background-color: var(--error-popup-bg);
     color: var(--error-popup-text);
-    border: 1px solid #c82333;
-    padding: 10px;
-    border-radius: 5px;
 }
 
+/* Warning Popup Styles */
 .popup-content.warning {
     background-color: var(--warning-popup-bg);
     color: var(--warning-popup-text);
@@ -382,53 +387,54 @@ input:checked ~ .moon-icon { /* Using general sibling selector */
 
 /* Reset Button Specific Styles */
 .reset-section {
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border-color);
+    margin-top: 30px; /* Space from above sections */
+    padding-top: 20px; /* Padding above the button */
+    border-top: 1px solid var(--border-color); /* Thin line above button */
 }
-
-/* Styles for reset countdown message */
-#resetCountdownMessage {
-    margin-bottom: 15px;
-    font-size: 1em;
-    color: var(--text-color);
-    font-weight: bold;
-    text-align: center;
-}
-#resetCountdownMessage span {
-    color: var(--primary-btn-bg);
-}
-
 
 .btn.reset-btn {
-    background-color: #dc3545;
-    color: var(--primary-btn-text);
-    width: auto;
-    padding: 12px 30px;
+    background-color: #dc3545; /* Red color */
+    color: var(--primary-btn-text); /* White text */
+    width: auto; /* Adjust width to content */
+    padding: 12px 30px; /* More padding */
     font-size: 1.1em;
     font-weight: bold;
     border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow */
 }
 
 .btn.reset-btn:hover {
-    background-color: #c82333;
+    background-color: #c82333; /* Darker red on hover */
     transform: translateY(-2px);
 }
 
 .dark-mode .btn.reset-btn {
-    background-color: #e74c3c;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+    background-color: #dc3545; /* Red color in dark mode */
 }
 
 .dark-mode .btn.reset-btn:hover {
-    background-color: #c0392b;
+    background-color: #c82333; /* Darker red in dark mode on hover */
 }
 
-/* Disabled state */
-.btn:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-    transform: none !important;
-    box-shadow: none !important;
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .app-container {
+        margin: 10px;
+        padding: 20px;
+    }
+
+    .app-title {
+        font-size: 1.8em;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 1em;
+    }
+
+    .popup-content {
+        font-size: 1em;
+        padding: 15px 25px;
+    }
 }
